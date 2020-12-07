@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     if (!sharedStoreyCount->attach()){
-        if (!sharedStoreyCount->create(sizeof(int))) qDebug() << tr("Create Error: ") << sharedStoreyCount->errorString();
+        if (!sharedStoreyCount->create(sizeof(int)) && !sharedStoreyCount->attach()) qDebug() << tr("Create Error: ") << sharedStoreyCount->errorString();
         else qDebug() << tr("Create Success");
         int val = 0;
         writeSharedInt(val, sharedStoreyCount);

@@ -215,6 +215,11 @@ void MainWindow::repeatExec(){
             break;
         case ELEVATOR_OPEN:
             status = ELEVATOR_WAIT;
+            {
+                int val = 0;
+                writeSharedInt(val, sharedOpen);
+                writeSharedInt(val, sharedClose);
+            }
             nextTime = 20;
             break;
         case ELEVATOR_WAIT:
@@ -272,10 +277,12 @@ void MainWindow::repeatExec(){
                 nextTime = 20;
                 int val = 0;
                 writeSharedInt(val, sharedOpen);
+                writeSharedInt(val, sharedClose);
             }
             else if (close == 1){
                 nextTime = 0;
                 int val = 0;
+                writeSharedInt(val, sharedOpen);
                 writeSharedInt(val, sharedClose);
             }
         }

@@ -135,7 +135,7 @@ void MainWindow::buttonToClicked(int floor){
 }
 
 void MainWindow::buttonOpenClicked(){
-    if (status == ELEVATOR_WAIT) emit open();
+    if (status == ELEVATOR_WAIT || status == ELEVATOR_STOP) emit open();
 }
 
 void MainWindow::buttonCloseClicked(){
