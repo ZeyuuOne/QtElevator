@@ -14,17 +14,17 @@ private:
     int myFloor;
     QSharedMemory *sharedRequestUp;
     QSharedMemory *sharedRequestDown;
+    QSharedMemory *sharedOpen;
 
     void writeSharedInt(int&, QSharedMemory *);
-
-signals:
-    void upCancel();
-    void downCancel();
 
 public slots:
     void setMyFloor(int);
     void up();
     void down();
+    void upCancel();
+    void downCancel();
+    void open();
 
 };
 

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "threadoperation.h"
 #include "QThread"
+#include "QTimer"
 
 #define ELEVATOR_STOP 0
 #define ELEVATOR_RUN 1
@@ -59,12 +60,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButtonDown,&QPushButton::clicked,this,&MainWindow::buttonDownClicked);
     connect(this,&MainWindow::up,objectOperation,&ThreadOperation::up);
     connect(this,&MainWindow::down,objectOperation,&ThreadOperation::down);
+    connect(this,&MainWindow::upCancel,objectOperation,&ThreadOperation::upCancel);
+    connect(this,&MainWindow::downCancel,objectOperation,&ThreadOperation::downCancel);
+    connect(this,&MainWindow::open,objectOperation,&ThreadOperation::open);
     threadOperation->start();
 
     emit setThreadOperation(myFloor);
 
-    refreshDisplay();
-
+    QTimer *timer = new QTimer(this);
+    connect(timer,&QTimer::timeout,this,&MainWindow::repeatExec);
+    timer->start(50);
 }
 
 MainWindow::~MainWindow()
@@ -143,14 +148,36 @@ void MainWindow::refreshDisplay(){
         break;
     case DIRECTION_UP:
         ui->labelUp->setVisible(1);
-        ui->labelDown->setVisible(1);
+        ui->labelDown->setVisible(0);
+        break;
     case DIRECTION_DOWN:
         ui->labelUp->setVisible(0);
         ui->labelDown->setVisible(1);
+        break;
+    }
+    if (status == ELEVATOR_OPEN && floor == myFloor){
+        ui->labelDoorLeft->setText("<<");
+        ui->labelDoorRight->setText(">>");
+    }
+    else if (status == ELEVATOR_WAIT && floor == myFloor){
+        ui->labelDoorLeft->setText("|   ");
+        ui->labelDoorRight->setText("   |");
+    }
+    else if ((status == ELEVATOR_CLOSE && floor == myFloor) || status == -1){
+        ui->labelDoorLeft->setText(">>");
+        ui->labelDoorRight->setText("<<");
+    }
+    else {
+        ui->labelDoorLeft->setText("");
+        ui->labelDoorRight->setText("");
     }
 }
 
 void MainWindow::buttonUpClicked(){
+    if (status == ELEVATOR_WAIT && floor == myFloor){
+        emit open();
+        return;
+    }
     ui->pushButtonUp->setChecked(1);
     if (!buttonUpDown){
         buttonUpDown = 1;
@@ -159,9 +186,48 @@ void MainWindow::buttonUpClicked(){
 }
 
 void MainWindow::buttonDownClicked(){
+    if (status == ELEVATOR_WAIT && floor == myFloor){
+        emit open();
+        return;
+    }
     ui->pushButtonDown->setChecked(1);
     if (!buttonDownDown){
         buttonDownDown = 1;
         emit down();
+    }
+}
+
+void MainWindow::repeatExec(){
+    readSharedInt(sharedFloor,floor);
+    readSharedInt(sharedStatus,status);
+    readSharedInt(sharedDirection,direction);
+    refreshDisplay();
+    if (floor == -1 || status == -1 || direction == -1) {
+        qDebug()<<"ELEVATOR NOT FOUND";
+        return;
+    }
+    if (floor == myFloor && status == ELEVATOR_WAIT){
+        if (direction == DIRECTION_UP){
+            if (buttonUpDown) emit upCancel();
+            buttonUpDown = 0;
+            ui->pushButtonUp->setChecked(0);
+        }
+        else if (direction == DIRECTION_DOWN){
+            if (buttonDownDown) emit downCancel();
+            buttonDownDown = 0;
+            ui->pushButtonDown->setChecked(0);
+        }
+        else {
+            if (buttonUpDown){
+                emit upCancel();
+                buttonUpDown = 0;
+                ui->pushButtonUp->setChecked(0);
+            }
+            else if (buttonDownDown){
+                emit downCancel();
+                buttonDownDown = 0;
+                ui->pushButtonDown->setChecked(0);
+            }
+        }
     }
 }

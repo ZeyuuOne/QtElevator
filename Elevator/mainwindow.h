@@ -5,6 +5,8 @@
 #include <QSharedMemory>
 #include <QBuffer>
 #include <QDebug>
+#include <QVector>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,6 +28,13 @@ private:
     QSharedMemory *sharedRequestUp[3];
     QSharedMemory *sharedRequestDown[3];
     QSharedMemory *sharedRequestTo[3];
+    QSharedMemory *sharedOpen;
+    QSharedMemory *sharedClose;
+
+    QLabel *labelFloor[3];
+    QLabel *labelRequestTo[3];
+    QLabel *labelRequestUp[3];
+    QLabel *labelRequestDown[3];
 
     int floor;
     int status;
@@ -33,11 +42,18 @@ private:
     int requestUp[3];
     int requestDown[3];
     int requestTo[3];
+    int open;
+    int close;
     int nextTime;
-    int nextStatus;
 
+    QVector<QString> statusString;
+    QVector<QString> directionString;
+
+    void readSharedInt(QSharedMemory *, int&);
     void writeSharedInt(int&, QSharedMemory *);
     void createSharedInt(int&, QSharedMemory *);
+
+    void refreshDisplay();
 
     void repeatExec();
 

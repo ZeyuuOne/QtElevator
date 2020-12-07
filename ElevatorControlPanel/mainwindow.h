@@ -21,6 +21,9 @@ public:
 
 signals:
     void to(int);
+    void toCancel(int);
+    void open();
+    void close();
 
 private:
     Ui::MainWindow *ui;
@@ -42,5 +45,9 @@ private:
     void refreshDisplay();
 
     void buttonToClicked(int);
+    void buttonOpenClicked();
+    void buttonCloseClicked();
+
+    void repeatExec();
 };
 #endif // MAINWINDOW_H

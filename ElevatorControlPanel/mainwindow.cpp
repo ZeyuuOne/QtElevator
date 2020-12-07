@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "threadoperation.h"
 #include "QThread"
+#include "QTimer"
 
 #define ELEVATOR_STOP 0
 #define ELEVATOR_RUN 1
@@ -42,9 +43,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButtonFloor2,&QPushButton::clicked,this,[&](){this->buttonToClicked(2);});
     connect(ui->pushButtonFloor3,&QPushButton::clicked,this,[&](){this->buttonToClicked(3);});
     connect(this,&MainWindow::to,objectOperation,&ThreadOperation::to);
+    connect(this,&MainWindow::toCancel,objectOperation,&ThreadOperation::toCancel);
+    connect(ui->pushButtonOpen,&QPushButton::clicked,this,&MainWindow::buttonOpenClicked);
+    connect(this,&MainWindow::open,objectOperation,&ThreadOperation::open);
+    connect(ui->pushButtonClose,&QPushButton::clicked,this,&MainWindow::buttonCloseClicked);
+    connect(this,&MainWindow::close,objectOperation,&ThreadOperation::close);
     threadOperation->start();
 
-    refreshDisplay();
+    QTimer *timer = new QTimer(this);
+    connect(timer,&QTimer::timeout,this,&MainWindow::repeatExec);
+    timer->start(50);
 }
 
 MainWindow::~MainWindow()
@@ -85,21 +93,36 @@ void MainWindow::writeSharedInt(int& src, QSharedMemory* dst){
 }
 
 void MainWindow::refreshDisplay(){
-    readSharedInt(sharedFloor,floor);
     ui->labelFloor->setText(floor == -1?"E":QString::number(floor));
-    readSharedInt(sharedStatus,status);
-    readSharedInt(sharedDirection,direction);
     switch (direction){
     case -1:
-        ui->labelUpDown->setText("■");
+        ui->labelUpDown->setText("-");
         break;
     case DIRECTION_NONE:
         ui->labelUpDown->setText("");
         break;
     case DIRECTION_UP:
         ui->labelUpDown->setText("▲");
+        break;
     case DIRECTION_DOWN:
         ui->labelUpDown->setText("▼");
+        break;
+    }
+    if (status == ELEVATOR_OPEN){
+        ui->labelDoorLeft->setText("<<");
+        ui->labelDoorRight->setText(">>");
+    }
+    else if (status == ELEVATOR_WAIT){
+        ui->labelDoorLeft->setText("|   ");
+        ui->labelDoorRight->setText("   |");
+    }
+    else if (status == ELEVATOR_CLOSE || status == -1){
+        ui->labelDoorLeft->setText(">>");
+        ui->labelDoorRight->setText("<<");
+    }
+    else {
+        ui->labelDoorLeft->setText("");
+        ui->labelDoorRight->setText("");
     }
 }
 
@@ -108,5 +131,29 @@ void MainWindow::buttonToClicked(int floor){
     if (!buttonToDown[floor - 1]){
         buttonToDown[floor - 1] = 1;
         emit to(floor);
+    }
+}
+
+void MainWindow::buttonOpenClicked(){
+    if (status == ELEVATOR_WAIT) emit open();
+}
+
+void MainWindow::buttonCloseClicked(){
+    if (status == ELEVATOR_WAIT) emit close();
+}
+
+void MainWindow::repeatExec(){
+    readSharedInt(sharedFloor,floor);
+    readSharedInt(sharedStatus,status);
+    readSharedInt(sharedDirection,direction);
+    refreshDisplay();
+    if (floor == -1 || status == -1 || direction == -1) {
+        qDebug()<<"ELEVATOR NOT FOUND";
+        return;
+    }
+    if (status == ELEVATOR_WAIT){
+        if (buttonToDown[floor - 1]) emit toCancel(floor);
+        buttonToDown[floor - 1] = 0;
+        pushButtonTo[floor - 1]->setChecked(0);
     }
 }

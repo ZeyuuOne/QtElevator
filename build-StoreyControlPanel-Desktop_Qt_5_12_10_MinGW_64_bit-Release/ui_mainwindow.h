@@ -27,6 +27,8 @@ public:
     QLabel *labelFloor;
     QLabel *labelUp;
     QLabel *labelDown;
+    QLabel *labelDoorLeft;
+    QLabel *labelDoorRight;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -47,13 +49,19 @@ public:
         font.setPointSize(18);
         pushButtonUp->setFont(font);
         pushButtonUp->setCheckable(true);
+        pushButtonUp->setAutoRepeat(true);
         pushButtonUp->setAutoExclusive(false);
+        pushButtonUp->setAutoRepeatDelay(50);
+        pushButtonUp->setAutoRepeatInterval(50);
         pushButtonDown = new QPushButton(centralwidget);
         pushButtonDown->setObjectName(QString::fromUtf8("pushButtonDown"));
         pushButtonDown->setGeometry(QRect(75, 320, 50, 50));
         pushButtonDown->setFont(font);
         pushButtonDown->setCheckable(true);
+        pushButtonDown->setAutoRepeat(true);
         pushButtonDown->setAutoExclusive(false);
+        pushButtonDown->setAutoRepeatDelay(50);
+        pushButtonDown->setAutoRepeatInterval(50);
         labelFloor = new QLabel(centralwidget);
         labelFloor->setObjectName(QString::fromUtf8("labelFloor"));
         labelFloor->setGeometry(QRect(40, 30, 120, 190));
@@ -87,6 +95,29 @@ public:
         labelDown->setStyleSheet(QString::fromUtf8("QLabel{background-color:rgb(0,0,0);color:rgb(239, 239, 239)}"));
         labelDown->setAlignment(Qt::AlignCenter);
         labelDown->setIndent(0);
+        labelDoorLeft = new QLabel(centralwidget);
+        labelDoorLeft->setObjectName(QString::fromUtf8("labelDoorLeft"));
+        labelDoorLeft->setGeometry(QRect(59, 190, 41, 20));
+        QFont font3;
+        font3.setFamily(QString::fromUtf8("Bahnschrift"));
+        font3.setPointSize(20);
+        font3.setBold(false);
+        font3.setWeight(50);
+        labelDoorLeft->setFont(font3);
+        labelDoorLeft->setToolTipDuration(0);
+        labelDoorLeft->setAutoFillBackground(false);
+        labelDoorLeft->setStyleSheet(QString::fromUtf8("QLabel{background-color:rgb(0,0,0);color:rgb(239, 239, 239)}"));
+        labelDoorLeft->setAlignment(Qt::AlignCenter);
+        labelDoorLeft->setIndent(0);
+        labelDoorRight = new QLabel(centralwidget);
+        labelDoorRight->setObjectName(QString::fromUtf8("labelDoorRight"));
+        labelDoorRight->setGeometry(QRect(100, 190, 41, 20));
+        labelDoorRight->setFont(font3);
+        labelDoorRight->setToolTipDuration(0);
+        labelDoorRight->setAutoFillBackground(false);
+        labelDoorRight->setStyleSheet(QString::fromUtf8("QLabel{background-color:rgb(0,0,0);color:rgb(239, 239, 239)}"));
+        labelDoorRight->setAlignment(Qt::AlignCenter);
+        labelDoorRight->setIndent(0);
         MainWindow->setCentralWidget(centralwidget);
 
         retranslateUi(MainWindow);
@@ -102,6 +133,8 @@ public:
         labelFloor->setText(QApplication::translate("MainWindow", "E", nullptr));
         labelUp->setText(QApplication::translate("MainWindow", "\342\226\262", nullptr));
         labelDown->setText(QApplication::translate("MainWindow", "\342\226\274", nullptr));
+        labelDoorLeft->setText(QApplication::translate("MainWindow", "<<", nullptr));
+        labelDoorRight->setText(QApplication::translate("MainWindow", ">>", nullptr));
     } // retranslateUi
 
 };

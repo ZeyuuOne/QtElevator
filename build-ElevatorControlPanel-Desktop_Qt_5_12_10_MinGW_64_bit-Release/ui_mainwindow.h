@@ -30,6 +30,8 @@ public:
     QLabel *labelFloor;
     QLabel *labelUpDown;
     QLabel *labelBackGround;
+    QLabel *labelDoorRight;
+    QLabel *labelDoorLeft;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -43,7 +45,7 @@ public:
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         pushButtonFloor1 = new QPushButton(centralwidget);
         pushButtonFloor1->setObjectName(QString::fromUtf8("pushButtonFloor1"));
-        pushButtonFloor1->setGeometry(QRect(75, 120, 50, 50));
+        pushButtonFloor1->setGeometry(QRect(75, 250, 50, 50));
         QFont font;
         font.setFamily(QString::fromUtf8("Bahnschrift SemiLight"));
         font.setPointSize(24);
@@ -60,7 +62,7 @@ public:
         pushButtonFloor2->setCheckable(true);
         pushButtonFloor3 = new QPushButton(centralwidget);
         pushButtonFloor3->setObjectName(QString::fromUtf8("pushButtonFloor3"));
-        pushButtonFloor3->setGeometry(QRect(75, 250, 50, 50));
+        pushButtonFloor3->setGeometry(QRect(75, 120, 50, 50));
         pushButtonFloor3->setFont(font);
         pushButtonFloor3->setToolTipDuration(-1);
         pushButtonFloor3->setCheckable(true);
@@ -73,14 +75,20 @@ public:
         font1.setKerning(false);
         pushButtonOpen->setFont(font1);
         pushButtonOpen->setToolTipDuration(-1);
+        pushButtonOpen->setAutoRepeat(true);
+        pushButtonOpen->setAutoRepeatDelay(50);
+        pushButtonOpen->setAutoRepeatInterval(50);
         pushButtonClose = new QPushButton(centralwidget);
         pushButtonClose->setObjectName(QString::fromUtf8("pushButtonClose"));
         pushButtonClose->setGeometry(QRect(110, 320, 50, 50));
         pushButtonClose->setFont(font1);
         pushButtonClose->setToolTipDuration(-1);
+        pushButtonClose->setAutoRepeat(true);
+        pushButtonClose->setAutoRepeatDelay(50);
+        pushButtonClose->setAutoRepeatInterval(50);
         labelFloor = new QLabel(centralwidget);
         labelFloor->setObjectName(QString::fromUtf8("labelFloor"));
-        labelFloor->setGeometry(QRect(45, 25, 60, 75));
+        labelFloor->setGeometry(QRect(45, 25, 60, 66));
         QFont font2;
         font2.setFamily(QString::fromUtf8("Bahnschrift SemiLight"));
         font2.setPointSize(36);
@@ -91,7 +99,7 @@ public:
         labelFloor->setIndent(0);
         labelUpDown = new QLabel(centralwidget);
         labelUpDown->setObjectName(QString::fromUtf8("labelUpDown"));
-        labelUpDown->setGeometry(QRect(100, 25, 60, 75));
+        labelUpDown->setGeometry(QRect(100, 25, 60, 66));
         QFont font3;
         font3.setFamily(QString::fromUtf8("Franklin Gothic Demi Cond"));
         font3.setPointSize(18);
@@ -108,6 +116,29 @@ public:
         labelBackGround->setStyleSheet(QString::fromUtf8("QLabel{background-color:rgb(0, 0, 0);color:rgb(239, 239, 239);}"));
         labelBackGround->setAlignment(Qt::AlignCenter);
         labelBackGround->setIndent(0);
+        labelDoorRight = new QLabel(centralwidget);
+        labelDoorRight->setObjectName(QString::fromUtf8("labelDoorRight"));
+        labelDoorRight->setGeometry(QRect(100, 78, 61, 20));
+        QFont font4;
+        font4.setFamily(QString::fromUtf8("Bahnschrift"));
+        font4.setPointSize(16);
+        font4.setBold(false);
+        font4.setWeight(50);
+        labelDoorRight->setFont(font4);
+        labelDoorRight->setToolTipDuration(0);
+        labelDoorRight->setAutoFillBackground(false);
+        labelDoorRight->setStyleSheet(QString::fromUtf8("QLabel{background-color:rgb(0,0,0);color:rgb(239, 239, 239)}"));
+        labelDoorRight->setAlignment(Qt::AlignCenter);
+        labelDoorRight->setIndent(0);
+        labelDoorLeft = new QLabel(centralwidget);
+        labelDoorLeft->setObjectName(QString::fromUtf8("labelDoorLeft"));
+        labelDoorLeft->setGeometry(QRect(39, 78, 61, 20));
+        labelDoorLeft->setFont(font4);
+        labelDoorLeft->setToolTipDuration(0);
+        labelDoorLeft->setAutoFillBackground(false);
+        labelDoorLeft->setStyleSheet(QString::fromUtf8("QLabel{background-color:rgb(0,0,0);color:rgb(239, 239, 239)}"));
+        labelDoorLeft->setAlignment(Qt::AlignCenter);
+        labelDoorLeft->setIndent(0);
         MainWindow->setCentralWidget(centralwidget);
         labelBackGround->raise();
         pushButtonFloor1->raise();
@@ -117,6 +148,8 @@ public:
         pushButtonClose->raise();
         labelFloor->raise();
         labelUpDown->raise();
+        labelDoorRight->raise();
+        labelDoorLeft->raise();
 
         retranslateUi(MainWindow);
 
@@ -134,6 +167,8 @@ public:
         labelFloor->setText(QApplication::translate("MainWindow", "E", nullptr));
         labelUpDown->setText(QApplication::translate("MainWindow", "\342\226\262", nullptr));
         labelBackGround->setText(QString());
+        labelDoorRight->setText(QApplication::translate("MainWindow", ">>", nullptr));
+        labelDoorLeft->setText(QApplication::translate("MainWindow", "<<", nullptr));
     } // retranslateUi
 
 };

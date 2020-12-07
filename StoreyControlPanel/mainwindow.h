@@ -22,6 +22,9 @@ signals:
     void setThreadOperation(int);
     void up();
     void down();
+    void upCancel();
+    void downCancel();
+    void open();
 
 private:
     Ui::MainWindow *ui;
@@ -45,5 +48,7 @@ private:
 
     void buttonUpClicked();
     void buttonDownClicked();
+
+    void repeatExec();
 };
 #endif // MAINWINDOW_H

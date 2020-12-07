@@ -12,6 +12,8 @@ public:
 
 private:
     QSharedMemory *sharedRequestTo[3];
+    QSharedMemory *sharedOpen;
+    QSharedMemory *sharedClose;
 
     void writeSharedInt(int&, QSharedMemory *);
 
@@ -19,6 +21,9 @@ signals:
 
 public slots:
     void to(int);
+    void toCancel(int);
+    void open();
+    void close();
 
 };
 
