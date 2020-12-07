@@ -1,17 +1,24 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "threadoperation.h"
+#include "QThread"
 
 #define ELEVATOR_STOP 0
 #define ELEVATOR_UP 1
 #define ELEVATOR_DOWN 2
-#define ELEVATOR_OPEN 3
-#define ELEVATOR_CLOSE 4
-#define ELEVATOR_WAIT 5
+#define ELEVATOR_OPEN_STOP 3
+#define ELEVATOR_OPEN_UP 4
+#define ELEVATOR_OPEN_DOWN 5
+#define ELEVATOR_CLOSE_STOP 6
+#define ELEVATOR_CLOSE_UP 7
+#define ELEVATOR_CLOSE_DOWN 8
+#define ELEVATOR_WAIT_STOP 9
+#define ELEVATOR_WAIT_UP 10
+#define ELEVATOR_WAIT_DOWN 11
 
 const char* KEY_SHARED_STOREY_COUNT = "Storey";
 const char* KEY_SHARED_FLOOR = "Floor";
 const char* KEY_SHARED_STATUS = "Status";
-const char* KEY_SHARED_REQUEST = "Request";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     , sharedStoreyCount(new QSharedMemory(KEY_SHARED_STOREY_COUNT, this))
     , sharedFloor(new QSharedMemory(KEY_SHARED_FLOOR, this))
     , sharedStatus(new QSharedMemory(KEY_SHARED_STATUS, this))
+    , buttonUpDown(0)
+    , buttonDownDown(0)
 {
     ui->setupUi(this);
     if (!sharedStoreyCount->attach()){
@@ -39,8 +48,24 @@ MainWindow::MainWindow(QWidget *parent)
         ui->pushButtonUp->setVisible(0);
         ui->pushButtonDown->setGeometry(75,285,50,50);
     }
-    readSharedInt(sharedFloor,floor);
-    ui->labelFloor->setText(floor == -1?"E":QString::number(floor));
+
+    QThread* threadOperation;
+    ThreadOperation* objectOperation;
+    threadOperation = new QThread();
+    objectOperation = new ThreadOperation();
+    objectOperation->moveToThread(threadOperation);
+    connect(threadOperation,&QThread::finished,threadOperation,&QObject::deleteLater);
+    connect(this,&MainWindow::setThreadOperation,objectOperation,&ThreadOperation::setMyFloor);
+    connect(ui->pushButtonUp,&QPushButton::clicked,this,&MainWindow::buttonUpClicked);
+    connect(ui->pushButtonDown,&QPushButton::clicked,this,&MainWindow::buttonDownClicked);
+    connect(this,&MainWindow::up,objectOperation,&ThreadOperation::up);
+    connect(this,&MainWindow::down,objectOperation,&ThreadOperation::down);
+    threadOperation->start();
+
+    emit setThreadOperation(myFloor);
+
+    refreshDisplay();
+
 }
 
 MainWindow::~MainWindow()
@@ -101,4 +126,42 @@ void MainWindow::incrementAndGetSharedInt(QSharedMemory *src, int& dst){
     memcpy(to,from,writeBuffer.size());
     src->unlock();
     dst++;
+}
+
+void MainWindow::refreshDisplay(){
+    readSharedInt(sharedFloor,floor);
+    ui->labelFloor->setText(floor == -1?"E":QString::number(floor));
+    readSharedInt(sharedStatus,status);
+    if (status == -1){
+        ui->labelUp->setVisible(1);
+        ui->labelDown->setVisible(1);
+    }
+    else if (status == ELEVATOR_CLOSE_UP || status == ELEVATOR_OPEN_UP || status == ELEVATOR_WAIT_UP || status == ELEVATOR_UP){
+        ui->labelUp->setVisible(1);
+        ui->labelDown->setVisible(0);
+    }
+    else if (status == ELEVATOR_CLOSE_DOWN || status == ELEVATOR_OPEN_DOWN || status == ELEVATOR_WAIT_DOWN || status == ELEVATOR_DOWN){
+        ui->labelUp->setVisible(0);
+        ui->labelDown->setVisible(1);
+    }
+    else {
+        ui->labelUp->setVisible(0);
+        ui->labelDown->setVisible(0);
+    }
+}
+
+void MainWindow::buttonUpClicked(){
+    ui->pushButtonUp->setChecked(1);
+    if (!buttonUpDown){
+        buttonUpDown = 1;
+        emit up();
+    }
+}
+
+void MainWindow::buttonDownClicked(){
+    ui->pushButtonDown->setChecked(1);
+    if (!buttonDownDown){
+        buttonDownDown = 1;
+        emit down();
+    }
 }

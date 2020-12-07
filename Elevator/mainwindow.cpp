@@ -4,9 +4,15 @@
 #define ELEVATOR_STOP 0
 #define ELEVATOR_UP 1
 #define ELEVATOR_DOWN 2
-#define ELEVATOR_OPEN 3
-#define ELEVATOR_CLOSE 4
-#define ELEVATOR_WAIT 5
+#define ELEVATOR_OPEN_STOP 3
+#define ELEVATOR_OPEN_UP 4
+#define ELEVATOR_OPEN_DOWN 5
+#define ELEVATOR_CLOSE_STOP 6
+#define ELEVATOR_CLOSE_UP 7
+#define ELEVATOR_CLOSE_DOWN 8
+#define ELEVATOR_WAIT_STOP 9
+#define ELEVATOR_WAIT_UP 10
+#define ELEVATOR_WAIT_DOWN 11
 
 const char* KEY_SHARED_FLOOR = "Floor";
 const char* KEY_SHARED_STATUS = "Status";
@@ -17,16 +23,31 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , sharedFloor(new QSharedMemory(KEY_SHARED_FLOOR, this))
     , sharedStatus(new QSharedMemory(KEY_SHARED_STATUS, this))
+    , floor(1)
+    , status(ELEVATOR_STOP)
 {
     ui->setupUi(this);
 
-    floor = 1;
-    status = ELEVATOR_STOP;
-    for (int i = 0;i < 6;i++) request[i] = 0;
+    for (int i = 0;i < 3;i++) {
+        sharedRequestUp[i] = new QSharedMemory(KEY_SHARED_REQUEST + QString("Up") + QString::number(i + 1), this);
+        sharedRequestDown[i] = new QSharedMemory(KEY_SHARED_REQUEST + QString("Down") + QString::number(i + 1), this);
+        sharedRequestTo[i] = new QSharedMemory(KEY_SHARED_REQUEST + QString("To") + QString::number(i + 1), this);
+    }
 
-    if (sharedFloor->attach()) sharedFloor->detach();
-    if (!sharedFloor->create(sizeof(int))) qDebug() << tr("Create Error: ") << sharedFloor->errorString();
-    writeSharedInt(floor,sharedFloor);
+    for (int i = 0;i < 3;i++){
+        requestUp[i] = 0;
+        requestDown[i] = 0;
+        requestTo[i] = 0;
+    }
+
+    createSharedInt(floor,sharedFloor);
+    createSharedInt(status,sharedStatus);
+    for (int i = 0;i < 3;i++) {
+        int val = 0;
+        createSharedInt(val,sharedRequestUp[i]);
+        createSharedInt(val,sharedRequestDown[i]);
+        createSharedInt(val,sharedRequestTo[i]);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -51,3 +72,8 @@ void MainWindow::writeSharedInt(int& src, QSharedMemory* dst){
     dst->unlock();
 }
 
+void MainWindow::createSharedInt(int& src, QSharedMemory* dst){
+    if (dst->attach()) dst->detach();
+    if (!dst->create(sizeof(int))) qDebug() << tr("Create Error: ") << dst->errorString();
+    writeSharedInt(src,dst);
+}

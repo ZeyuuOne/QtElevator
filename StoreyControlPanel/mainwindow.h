@@ -18,20 +18,30 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void setThreadOperation(int);
+    void up();
+    void down();
+
 private:
     Ui::MainWindow *ui;
     QSharedMemory *sharedStoreyCount;
     QSharedMemory *sharedFloor;
     QSharedMemory *sharedStatus;
-    QSharedMemory *sharedRequest[2];
 
     int myFloor;
     int floor;
     int status;
-    bool request[2];
+    bool buttonUpDown;
+    bool buttonDownDown;
 
     void readSharedInt(QSharedMemory *, int&);
     void writeSharedInt(int&, QSharedMemory *);
     void incrementAndGetSharedInt(QSharedMemory *, int&);
+
+    void refreshDisplay();
+
+    void buttonUpClicked();
+    void buttonDownClicked();
 };
 #endif // MAINWINDOW_H

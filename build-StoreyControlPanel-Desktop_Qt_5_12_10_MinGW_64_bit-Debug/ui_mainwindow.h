@@ -46,10 +46,12 @@ public:
         font.setFamily(QString::fromUtf8("Franklin Gothic Demi Cond"));
         font.setPointSize(18);
         pushButtonUp->setFont(font);
+        pushButtonUp->setCheckable(false);
         pushButtonDown = new QPushButton(centralwidget);
         pushButtonDown->setObjectName(QString::fromUtf8("pushButtonDown"));
         pushButtonDown->setGeometry(QRect(75, 320, 50, 50));
         pushButtonDown->setFont(font);
+        pushButtonDown->setCheckable(false);
         labelFloor = new QLabel(centralwidget);
         labelFloor->setObjectName(QString::fromUtf8("labelFloor"));
         labelFloor->setGeometry(QRect(40, 30, 120, 190));

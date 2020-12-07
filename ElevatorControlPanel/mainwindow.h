@@ -5,6 +5,7 @@
 #include <QSharedMemory>
 #include <QBuffer>
 #include <QDebug>
+#include <QPushButton>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,10 +19,26 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void to(int);
+
 private:
     Ui::MainWindow *ui;
     QSharedMemory *sharedFloor;
     QSharedMemory *sharedStatus;
-    QSharedMemory *sharedRequest[3];
+
+    QPushButton *pushButtonTo[3];
+
+    int floor;
+    int status;
+
+    bool buttonToDown[3];
+
+    void readSharedInt(QSharedMemory *, int&);
+    void writeSharedInt(int&, QSharedMemory *);
+
+    void refreshDisplay();
+
+    void buttonToClicked(int);
 };
 #endif // MAINWINDOW_H
