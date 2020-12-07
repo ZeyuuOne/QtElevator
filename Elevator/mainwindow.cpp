@@ -1,21 +1,21 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "QTimer"
+#include "QTime"
 
 #define ELEVATOR_STOP 0
-#define ELEVATOR_UP 1
-#define ELEVATOR_DOWN 2
-#define ELEVATOR_OPEN_STOP 3
-#define ELEVATOR_OPEN_UP 4
-#define ELEVATOR_OPEN_DOWN 5
-#define ELEVATOR_CLOSE_STOP 6
-#define ELEVATOR_CLOSE_UP 7
-#define ELEVATOR_CLOSE_DOWN 8
-#define ELEVATOR_WAIT_STOP 9
-#define ELEVATOR_WAIT_UP 10
-#define ELEVATOR_WAIT_DOWN 11
+#define ELEVATOR_RUN 1
+#define ELEVATOR_OPEN 2
+#define ELEVATOR_CLOSE 3
+#define ELEVATOR_WAIT 4
+
+#define DIRECTION_NONE 0
+#define DIRECTION_UP 1
+#define DIRECTION_DOWN 2
 
 const char* KEY_SHARED_FLOOR = "Floor";
 const char* KEY_SHARED_STATUS = "Status";
+const char* KEY_SHARED_DIRECTION = "Direction";
 const char* KEY_SHARED_REQUEST = "Request";
 
 MainWindow::MainWindow(QWidget *parent)
@@ -23,8 +23,12 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , sharedFloor(new QSharedMemory(KEY_SHARED_FLOOR, this))
     , sharedStatus(new QSharedMemory(KEY_SHARED_STATUS, this))
+    , sharedDirection(new QSharedMemory(KEY_SHARED_DIRECTION, this))
     , floor(1)
     , status(ELEVATOR_STOP)
+    , direction(DIRECTION_NONE)
+    , nextTime(0)
+    , nextStatus(ELEVATOR_STOP)
 {
     ui->setupUi(this);
 
@@ -42,12 +46,17 @@ MainWindow::MainWindow(QWidget *parent)
 
     createSharedInt(floor,sharedFloor);
     createSharedInt(status,sharedStatus);
+    createSharedInt(direction,sharedDirection);
     for (int i = 0;i < 3;i++) {
         int val = 0;
         createSharedInt(val,sharedRequestUp[i]);
         createSharedInt(val,sharedRequestDown[i]);
         createSharedInt(val,sharedRequestTo[i]);
     }
+
+    QTimer *timer = new QTimer(this);
+    connect(timer,&QTimer::timeout,this,&MainWindow::repeatExec);
+    timer->start(50);
 }
 
 MainWindow::~MainWindow()
@@ -76,4 +85,50 @@ void MainWindow::createSharedInt(int& src, QSharedMemory* dst){
     if (dst->attach()) dst->detach();
     if (!dst->create(sizeof(int))) qDebug() << tr("Create Error: ") << dst->errorString();
     writeSharedInt(src,dst);
+}
+
+void MainWindow::repeatExec(){
+    if (nextTime == 0){
+        switch(status){
+        case ELEVATOR_STOP:
+            for (int i = 0;i < 3;i++){
+                if (requestTo[i] == 1 || requestUp[i] == 1 || requestDown[i] == 1){
+                    if (i + 1 == floor){
+                        status = ELEVATOR_OPEN;
+                        nextTime = 10;
+                        break;
+                    }
+                    status = ELEVATOR_RUN;
+                    nextTime = 20;
+                    direction = i + 1 > floor?DIRECTION_UP:DIRECTION_DOWN;
+                    break;
+                }
+            }
+            break;
+        case ELEVATOR_RUN:
+            if (requestTo[floor - 1] == 1 || requestUp[floor - 1] == 1 || requestDown[floor - 1] == 1){
+                status = ELEVATOR_OPEN;
+                nextTime = 10;
+                break;
+            }
+            if (direction == DIRECTION_UP){
+                bool next = 0;
+                for (int i = floor - 1;i < 3;i++) if (requestTo[i] == 1 || requestUp[i] == 1 || requestDown[i] == 1) {
+                    next = 1;
+                    break;
+                }
+                if (next == 0){
+                    status = ELEVATOR_STOP;
+                    break;
+                }
+                status = ELEVATOR_RUN;
+                nextTime = 20;
+            }
+            break;
+        }
+
+    }
+    else {
+        nextTime--;
+    }
 }

@@ -28,10 +28,12 @@ private:
     QSharedMemory *sharedStoreyCount;
     QSharedMemory *sharedFloor;
     QSharedMemory *sharedStatus;
+    QSharedMemory *sharedDirection;
 
     int myFloor;
     int floor;
     int status;
+    int direction;
     bool buttonUpDown;
     bool buttonDownDown;
 

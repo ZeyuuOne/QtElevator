@@ -4,26 +4,25 @@
 #include "QThread"
 
 #define ELEVATOR_STOP 0
-#define ELEVATOR_UP 1
-#define ELEVATOR_DOWN 2
-#define ELEVATOR_OPEN_STOP 3
-#define ELEVATOR_OPEN_UP 4
-#define ELEVATOR_OPEN_DOWN 5
-#define ELEVATOR_CLOSE_STOP 6
-#define ELEVATOR_CLOSE_UP 7
-#define ELEVATOR_CLOSE_DOWN 8
-#define ELEVATOR_WAIT_STOP 9
-#define ELEVATOR_WAIT_UP 10
-#define ELEVATOR_WAIT_DOWN 11
+#define ELEVATOR_RUN 1
+#define ELEVATOR_OPEN 2
+#define ELEVATOR_CLOSE 3
+#define ELEVATOR_WAIT 4
+
+#define DIRECTION_NONE 0
+#define DIRECTION_UP 1
+#define DIRECTION_DOWN 2
 
 const char* KEY_SHARED_FLOOR = "Floor";
 const char* KEY_SHARED_STATUS = "Status";
+const char* KEY_SHARED_DIRECTION = "Direction";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , sharedFloor(new QSharedMemory(KEY_SHARED_FLOOR, this))
     , sharedStatus(new QSharedMemory(KEY_SHARED_STATUS, this))
+    , sharedDirection(new QSharedMemory(KEY_SHARED_DIRECTION, this))
 {
     ui->setupUi(this);
     this->setWindowTitle("控制面板：电梯");
@@ -89,17 +88,18 @@ void MainWindow::refreshDisplay(){
     readSharedInt(sharedFloor,floor);
     ui->labelFloor->setText(floor == -1?"E":QString::number(floor));
     readSharedInt(sharedStatus,status);
-    if (status == -1){
+    readSharedInt(sharedDirection,direction);
+    switch (direction){
+    case -1:
         ui->labelUpDown->setText("■");
-    }
-    else if (status == ELEVATOR_CLOSE_UP || status == ELEVATOR_OPEN_UP || status == ELEVATOR_WAIT_UP || status == ELEVATOR_UP){
-        ui->labelUpDown->setText("▲");
-    }
-    else if (status == ELEVATOR_CLOSE_DOWN || status == ELEVATOR_OPEN_DOWN || status == ELEVATOR_WAIT_DOWN || status == ELEVATOR_DOWN){
-        ui->labelUpDown->setText("▼");
-    }
-    else {
+        break;
+    case DIRECTION_NONE:
         ui->labelUpDown->setText("");
+        break;
+    case DIRECTION_UP:
+        ui->labelUpDown->setText("▲");
+    case DIRECTION_DOWN:
+        ui->labelUpDown->setText("▼");
     }
 }
 

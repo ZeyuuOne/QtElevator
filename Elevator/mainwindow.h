@@ -22,18 +22,24 @@ private:
     Ui::MainWindow *ui;
     QSharedMemory *sharedFloor;
     QSharedMemory *sharedStatus;
+    QSharedMemory *sharedDirection;
     QSharedMemory *sharedRequestUp[3];
     QSharedMemory *sharedRequestDown[3];
     QSharedMemory *sharedRequestTo[3];
 
     int floor;
     int status;
+    int direction;
     int requestUp[3];
     int requestDown[3];
     int requestTo[3];
+    int nextTime;
+    int nextStatus;
 
     void writeSharedInt(int&, QSharedMemory *);
     void createSharedInt(int&, QSharedMemory *);
+
+    void repeatExec();
 
 };
 #endif // MAINWINDOW_H

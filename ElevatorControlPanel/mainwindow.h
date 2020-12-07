@@ -26,11 +26,13 @@ private:
     Ui::MainWindow *ui;
     QSharedMemory *sharedFloor;
     QSharedMemory *sharedStatus;
+    QSharedMemory *sharedDirection;
 
     QPushButton *pushButtonTo[3];
 
     int floor;
     int status;
+    int direction;
 
     bool buttonToDown[3];
 
