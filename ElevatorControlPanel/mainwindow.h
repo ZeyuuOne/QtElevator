@@ -21,5 +21,7 @@ public:
 private:
     Ui::MainWindow *ui;
     QSharedMemory *sharedFloor;
+    QSharedMemory *sharedStatus;
+    QSharedMemory *sharedRequest[3];
 };
 #endif // MAINWINDOW_H

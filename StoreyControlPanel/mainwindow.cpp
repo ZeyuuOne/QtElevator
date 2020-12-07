@@ -29,6 +29,16 @@ MainWindow::MainWindow(QWidget *parent)
     }
     incrementAndGetSharedInt(sharedStoreyCount,myFloor);
     this->setWindowTitle("控制面板："+QString::number(myFloor)+"层");
+    if (myFloor <= 1 || myFloor > 3) {
+        ui->pushButtonDown->setEnabled(0);
+        ui->pushButtonDown->setVisible(0);
+        ui->pushButtonUp->setGeometry(75,285,50,50);
+    }
+    if (myFloor >= 3 || myFloor < 1) {
+        ui->pushButtonUp->setEnabled(0);
+        ui->pushButtonUp->setVisible(0);
+        ui->pushButtonDown->setGeometry(75,285,50,50);
+    }
     readSharedInt(sharedFloor,floor);
     ui->labelFloor->setText(floor == -1?"E":QString::number(floor));
 }
